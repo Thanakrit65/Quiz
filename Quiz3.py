@@ -13,8 +13,8 @@ from typing import Callable, Dict
 app = Flask(__name__)
 
 
-CHANNEL_ACCESS_TOKEN = 'ywbRGQlnzStCkk3RBEP+V+QVT+lbOe7OtOxRxfkzBinHbE2mq5rDYfuGmMyvkiouSmKXxIjbth0+gVqKcNyksBXSVDgZ7ju1zTB8yNLpVIhQ+usNNYIFwkpo9O12HpKgUvg9U+OldqmLblx8pWfhiAdB04t89/1O/w1cDnyilFU='
-CHANNEL_SECRET = '4dd03d6c9c52200c7b92173733749743'
+CHANNEL_ACCESS_TOKEN = 'your line access token'
+CHANNEL_SECRET = 'your line channel secret'
 
 
 configuration = Configuration(access_token=CHANNEL_ACCESS_TOKEN)
