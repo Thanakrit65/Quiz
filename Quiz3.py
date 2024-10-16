@@ -1,4 +1,3 @@
-import os
 from flask import Flask, request, abort
 from linebot.v3 import WebhookHandler
 from linebot.v3.exceptions import InvalidSignatureError
@@ -6,25 +5,23 @@ from linebot.v3.messaging import (
     Configuration, ApiClient, MessagingApi, ReplyMessageRequest,
     TextMessage, QuickReply, QuickReplyItem, MessageAction,
     TemplateMessage, ButtonsTemplate, CarouselTemplate, CarouselColumn,
-    URIAction, PostbackAction
+    URIAction
 )
 from linebot.v3.webhooks import MessageEvent, TextMessageContent
 from typing import Callable, Dict
 
 app = Flask(__name__)
 
-# Load configuration from environment variables
-CHANNEL_ACCESS_TOKEN = os.environ.get('LINE_CHANNEL_ACCESS_TOKEN')
-CHANNEL_SECRET = os.environ.get('LINE_CHANNEL_SECRET')
 
-if not CHANNEL_ACCESS_TOKEN or not CHANNEL_SECRET:
-    raise ValueError("LINE_CHANNEL_ACCESS_TOKEN and LINE_CHANNEL_SECRET must be set in environment variables")
+CHANNEL_ACCESS_TOKEN = 'ywbRGQlnzStCkk3RBEP+V+QVT+lbOe7OtOxRxfkzBinHbE2mq5rDYfuGmMyvkiouSmKXxIjbth0+gVqKcNyksBXSVDgZ7ju1zTB8yNLpVIhQ+usNNYIFwkpo9O12HpKgUvg9U+OldqmLblx8pWfhiAdB04t89/1O/w1cDnyilFU='
+CHANNEL_SECRET = '4dd03d6c9c52200c7b92173733749743'
+
 
 configuration = Configuration(access_token=CHANNEL_ACCESS_TOKEN)
 handler = WebhookHandler(CHANNEL_SECRET)
 
 def send_reply(reply_token: str, messages: list) -> None:
-    """Send a reply to the user."""
+    """ฟังก์ชันตอบกลับผู้ใช้"""
     with ApiClient(configuration) as api_client:
         line_bot_api = MessagingApi(api_client)
         line_bot_api.reply_message_with_http_info(
@@ -38,28 +35,30 @@ def handle_text_message(event: MessageEvent) -> None:
     handler_func(event)
 
 def simple_text_reply(text: str) -> Callable[[MessageEvent], None]:
-    """Create a simple text reply handler."""
+    """ตอบกลับด้วยText"""
     def handler(event: MessageEvent) -> None:
         send_reply(event.reply_token, [TextMessage(text=text)])
     return handler
 
 def quickreply_handler(event: MessageEvent) -> None:
-    """Handle quick reply message."""
+    """ตอบกลับด้วยQuickReply"""
     quick_reply = QuickReply(items=[
-        QuickReplyItem(action=MessageAction(label="Send photo", text="Send photo")),
-        QuickReplyItem(action=MessageAction(label="Open camera", text="Open camera"))
+        QuickReplyItem(action=MessageAction(label="Hello", text="1")),
+        QuickReplyItem(action=MessageAction(label="Nice", text="2")),
+        QuickReplyItem(action=MessageAction(label="Quickreply", text="3")),
+        QuickReplyItem(action=MessageAction(label="Button", text="4")),
+        QuickReplyItem(action=MessageAction(label="Carousel", text="5"))
     ])
-    send_reply(event.reply_token, [TextMessage(text="Here are some quick options:", quick_reply=quick_reply)])
+    send_reply(event.reply_token, [TextMessage(text="เลือกว่าให้บอทตอบแบบใด:", quick_reply=quick_reply)])
 
 def button_template_handler(event: MessageEvent) -> None:
-    """Handle button template message."""
+    """ตอบกลับด้วย button template"""
     buttons_template = TemplateMessage(
         alt_text="Button Template",
         template=ButtonsTemplate(
             title="Menu",
             text="Please select an option",
             actions=[
-                PostbackAction(label="Buy", data="action=buy&itemid=1"),
                 MessageAction(label="Say Hello", text="Hello!"),
                 URIAction(label="Visit our website", uri="http://example.com")
             ]
@@ -68,7 +67,7 @@ def button_template_handler(event: MessageEvent) -> None:
     send_reply(event.reply_token, [buttons_template])
 
 def carousel_template_handler(event: MessageEvent) -> None:
-    """Handle carousel template message."""
+    """ตอบกลับด้วย carousel template"""
     carousel_template = TemplateMessage(
         alt_text="Carousel Template",
         template=CarouselTemplate(
@@ -78,7 +77,6 @@ def carousel_template_handler(event: MessageEvent) -> None:
                     title="This is item 1",
                     text="Description for item 1",
                     actions=[
-                        PostbackAction(label="Buy Item 1", data="action=buy&itemid=1"),
                         MessageAction(label="More Info", text="More info about item 1")
                     ]
                 ),
@@ -87,7 +85,6 @@ def carousel_template_handler(event: MessageEvent) -> None:
                     title="This is item 2",
                     text="Description for item 2",
                     actions=[
-                        PostbackAction(label="Buy Item 2", data="action=buy&itemid=2"),
                         MessageAction(label="More Info", text="More info about item 2")
                     ]
                 ),
@@ -96,7 +93,6 @@ def carousel_template_handler(event: MessageEvent) -> None:
                     title="This is item 3",
                     text="Description for item 3",
                     actions=[
-                        PostbackAction(label="Buy Item 3", data="action=buy&itemid=3"),
                         MessageAction(label="More Info", text="More info about item 3")
                     ]
                 )
@@ -106,10 +102,10 @@ def carousel_template_handler(event: MessageEvent) -> None:
     send_reply(event.reply_token, [carousel_template])
 
 def default_handler(event: MessageEvent) -> None:
-    """Handle default case by echoing the user's message."""
-    send_reply(event.reply_token, [TextMessage(text=event.message.text)])
+    """ตอบกลับด้วยข้อความค่าเริ่มต้นเมื่อผู้ใช้ส่งข้อความไม่ตรงเงื่อนไข"""
+    send_reply(event.reply_token, [TextMessage(text="ส่งเลข 1 ถึง 5 เพื่อให้แชทบอทตอบกลับต่อไปนี้\n1 ตอบว่า good \n2 ตอบว่า nice\n3 เลือกquickreply\n4 button\n5 carousel")])
 
-# Map user inputs to handler functions
+# Map รูปแบบการตอบกลับตามข้อความที่ผู้ใช้ส่งมา
 message_handlers: Dict[str, Callable[[MessageEvent], None]] = {
     "1": simple_text_reply("good"),
     "2": simple_text_reply("nice"),

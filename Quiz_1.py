@@ -1,4 +1,3 @@
-#1
 x = int(input("input X : "))
 i=0
 while i < x:
